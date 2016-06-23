@@ -11,7 +11,8 @@ app.set("view engine", "ejs");
 // Schema Setup 
 var campgroundSchema = new mongoose.Schema({
 	name: String,
-	imageurl: String
+	imageurl: String,
+	desc: String
 });
 // creates model using schema
 var Campground = mongoose.model("Campground", campgroundSchema);
@@ -61,7 +62,7 @@ app.get("/campgrounds", function (req, res) {
 		if (err) {
 			console.log(err);
 		}else {
-			res.render("campgrounds", {campgrounds: allCampgrounds});
+			res.render("index", {campgrounds: allCampgrounds});
 		}
 	});
 });
@@ -70,15 +71,17 @@ app.post("/campgrounds", function(req, res){
 	// get data from form & add to campground array
 	var name = req.body.name;
 	var image = req.body.image;
-	var newCampground = {name: name, imageurl: image}
+	var desc = req.body.desc;
+	var newCampground = {name: name, imageurl: image, desc: desc};
 	// create new campground and save to DB
-	Campground.create(newCampground, function (msg, newCG) {
+	Campground.create(newCampground, function (err, newCG) {
 		 /* body... */
-		 if (msg) {
-		 	console.log(msg)
+		 if (err) {
+		 	console.log(err)
 		 } else {
 		 // redirect back to "get" route of campgrounds
 			res.redirect("/campgrounds");
+			console.log(newCampground);
 		 }
 	});
 });
@@ -87,6 +90,19 @@ app.get("/campgrounds/new", function (req, res) {
 	 /* body... */ 
 	 res.render("new");
 });
+
+app.get("/campgrounds/:id", function (req, res) {
+	 /* body... */
+	 Campground.findById(req.params.id, function (err, foundCampground) {
+	 	 /* body... */ 
+	 	 if(err){
+	 	 	console.log(err);
+	 	 }else {
+	 	 	res.render("show", {campground: foundCampground});
+	 	 }
+	 });
+});
+
 app.listen(8080, function(){
 	console.log("yelp camp started")
 });
